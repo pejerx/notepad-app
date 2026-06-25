@@ -1,18 +1,225 @@
-# React + Vite
+# Notepad Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A full-stack Notepad application built using **React.js**, **Node.js (Express)**, and **Supabase PostgreSQL**. The application allows users to create, edit, delete, search, and manage notes through a modern web interface.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Tech Stack
 
-## React Compiler
+### Frontend
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+* React.js
+* Vite
+* CSS
 
-Note: This will impact Vite dev & build performances.
+### Backend
 
-## Expanding the ESLint configuration
+* Node.js
+* Express.js
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Database
+
+* Supabase (PostgreSQL)
+
+---
+
+## Project Structure
+
+```text
+notepad-app/
+│
+├── frontend/
+│   ├── src/
+│   ├── public/
+│   ├── package.json
+│   └── ...
+│
+├── backend/
+│   ├── server.js
+│   ├── db.js
+│   ├── package.json
+│   ├── .env
+│   └── ...
+│
+└── README.md
+```
+
+---
+
+# Prerequisites
+
+Before running the application, install the following:
+
+* Node.js (v18 or newer)
+* npm
+* Git
+* Supabase account and project
+
+---
+
+# Installation
+
+## 1. Clone the Repository
+
+```bash
+git clone https://github.com/YOUR_USERNAME/notepad-app.git
+```
+
+Go inside the project.
+
+```bash
+cd notepad-app
+```
+
+---
+
+## 2. Install Frontend Dependencies
+
+```bash
+cd frontend
+npm install
+```
+
+---
+
+## 3. Install Backend Dependencies
+
+Open another terminal.
+
+```bash
+cd backend
+npm install
+```
+
+---
+
+# Environment Variables
+
+Create a file named `.env` inside the **backend** folder.
+
+Example:
+
+```env
+PORT=5000
+DATABASE_URL=postgresql://YOUR_CONNECTION_STRING
+```
+
+Replace `YOUR_CONNECTION_STRING` with your Supabase **Session Pooler** connection string.
+
+---
+
+# Running the Backend
+
+Inside the **backend** folder:
+
+```bash
+npm start
+```
+
+or
+
+```bash
+npm run dev
+```
+
+The backend will start on:
+
+```
+http://localhost:5000
+```
+
+---
+
+# Running the Frontend
+
+Inside the **frontend** folder:
+
+```bash
+npm run dev
+```
+
+The Vite development server will start.
+
+Example:
+
+```
+Local: http://localhost:5173
+```
+
+Open the URL shown in your browser.
+
+---
+
+# Available Frontend Commands
+
+Install dependencies
+
+```bash
+npm install
+```
+
+Run development server
+
+```bash
+npm run dev
+```
+
+Create production build
+
+```bash
+npm run build
+```
+
+Preview production build
+
+```bash
+npm run preview
+```
+
+---
+
+# Available Backend Commands
+
+Install dependencies
+
+```bash
+npm install
+```
+
+Run server
+
+```bash
+npm start
+```
+
+or
+
+```bash
+npm run dev
+```
+
+---
+
+# API Endpoints
+
+| Method | Endpoint   | Description              |
+| ------ | ---------- | ------------------------ |
+| GET    | /notes     | Retrieve all notes       |
+| GET    | /notes/:id | Retrieve a specific note |
+| POST   | /notes     | Create a new note        |
+| PUT    | /notes/:id | Update an existing note  |
+| DELETE | /notes/:id | Delete a note            |
+
+---
+
+# Database
+
+This project uses **Supabase PostgreSQL** as the backend database.
+
+The backend communicates with Supabase using the **pg** package and a secure connection string stored in the `.env` file.
+
+---
+
+# License
+
+This project is intended for educational purposes.
