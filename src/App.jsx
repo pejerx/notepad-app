@@ -1,135 +1,229 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 
 function App() {
-  const [notes, setNotes] = useState([
-    {
-      id: 1,
-      title: "Ikea shopping list 10 Dec 23",
-      content:
-        "☐ 2 folding chairs - FROSVI\n☐ 2 pint glasses\n☐ Wrapping paper\n☐ Paper napkins\n☐ Ribbon\n☐ Dill sauce",
-    },
-    {
-      id: 2,
-      title: "Christmas shopping 2023",
-      content: "Birthdays\n☑ Neil's mum\n☐ Grace Dent book",
-    },
-    {
-      id: 3,
-      title: "Trip to London",
-      content: "Cartoon museum\nhttps://www.cartoonmuseum.org",
-    },
-  ]);
+  const [notes, setNotes] = useState(() => {
+    const savedNotes = localStorage.getItem("notes");
+    return savedNotes ? JSON.parse(savedNotes) : [];
+  });
 
-  const [selectedNote, setSelectedNote] = useState(notes[0]);
+  const [selectedLabel, setSelectedLabel] = useState("All");
   const [search, setSearch] = useState("");
+  const [editingNote, setEditingNote] = useState(null);
 
-  const filteredNotes = notes.filter((note) =>
-    note.title.toLowerCase().includes(search.toLowerCase())
-  );
+  useEffect(() => {
+    localStorage.setItem("notes", JSON.stringify(notes));
+  }, [notes]);
+
+  const labels = ["Projects", "Business", "Personal"];
+
+  const filteredNotes = notes.filter((note) => {
+    const matchesSearch =
+      note.title.toLowerCase().includes(search.toLowerCase()) ||
+      note.content.toLowerCase().includes(search.toLowerCase());
+
+    const matchesLabel =
+      selectedLabel === "All" || note.label === selectedLabel;
+
+    return matchesSearch && matchesLabel;
+  });
 
   const addNote = () => {
     const newNote = {
       id: Date.now(),
       title: "Untitled Note",
       content: "",
+      label: "Projects",
+      date: new Date().toLocaleDateString("en-US", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }),
     };
 
     setNotes([newNote, ...notes]);
-    setSelectedNote(newNote);
+    setEditingNote(newNote);
   };
 
-  const updateNote = (field, value) => {
-    const updatedNote = { ...selectedNote, [field]: value };
-
-    setSelectedNote(updatedNote);
+  const saveNote = () => {
+    if (!editingNote) return;
 
     setNotes(
       notes.map((note) =>
-        note.id === selectedNote.id ? updatedNote : note
+        note.id === editingNote.id ? editingNote : note
       )
     );
+
+    setEditingNote(null);
   };
 
-  const deleteNote = () => {
-    const remainingNotes = notes.filter((note) => note.id !== selectedNote.id);
-
-    setNotes(remainingNotes);
-    setSelectedNote(remainingNotes[0] || null);
+  const deleteNote = (id) => {
+    setNotes(notes.filter((note) => note.id !== id));
+    setEditingNote(null);
   };
 
   return (
     <div className="app">
       <aside className="sidebar">
-        <div className="topbar">
-          <button className="icon-button">☰</button>
-          <h2>All Notes</h2>
-          <button className="icon-button" onClick={addNote}>✎</button>
+        <div className="sidebar-logo">
+          <div className="circle"></div>
+          <div className="line"></div>
         </div>
 
-        <div className="search">
-          <span>🔍</span>
-          <input
-            type="text"
-            placeholder="Search all notes and tags"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
+        <nav className="sidebar-menu">
+          <button className="menu-item active">▦ Overview</button>
+          <button className="menu-item">▣ Notes</button>
+        </nav>
 
-        <div className="note-list">
-          {filteredNotes.map((note) => (
-            <div
-              key={note.id}
-              className={`note-item ${
-                selectedNote?.id === note.id ? "active" : ""
+        <div className="legend">
+          <p className="legend-title">Labels</p>
+
+          <button
+            className={`legend-item ${selectedLabel === "All" ? "selected" : ""}`}
+            onClick={() => setSelectedLabel("All")}
+          >
+            <span className="dot all"></span> All
+          </button>
+
+          {labels.map((label) => (
+            <button
+              key={label}
+              className={`legend-item ${
+                selectedLabel === label ? "selected" : ""
               }`}
-              onClick={() => setSelectedNote(note)}
+              onClick={() => setSelectedLabel(label)}
             >
-              <h3>{note.title}</h3>
-              <p>{note.content.substring(0, 70)}...</p>
-            </div>
+              <span className={`dot ${label.toLowerCase()}`}></span>
+              {label}
+            </button>
           ))}
         </div>
       </aside>
 
-      <main className="editor">
-        {selectedNote ? (
-          <>
-            <div className="editor-toolbar">
-              <button className="icon-button">◧</button>
-              <div>
-                <button className="icon-button">👁</button>
-                <button className="icon-button">☷</button>
-                <button className="icon-button">ⓘ</button>
-                <button className="icon-button" onClick={deleteNote}>🗑</button>
-              </div>
-            </div>
-
-            <div className="editor-content">
-              <input
-                className="title-input"
-                value={selectedNote.title}
-                onChange={(e) => updateNote("title", e.target.value)}
-              />
-
-              <textarea
-                className="note-textarea"
-                value={selectedNote.content}
-                onChange={(e) => updateNote("content", e.target.value)}
-                placeholder="Start typing your note..."
-              />
-
-              <input className="tag-input" placeholder="Add tag..." />
-            </div>
-          </>
-        ) : (
-          <div className="empty-note">
-            <h2>No notes available</h2>
-            <button onClick={addNote}>Create Note</button>
+      <main className="main-content">
+        <header className="header">
+          <div className="search-box">
+            <span>🔍</span>
+            <input
+              type="text"
+              placeholder="Search notes..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
           </div>
+
+          <button className="add-btn" onClick={addNote}>
+            ＋ Add new note
+          </button>
+        </header>
+
+        <div className="tabs">
+          <button
+            className={selectedLabel === "All" ? "tab active-tab" : "tab"}
+            onClick={() => setSelectedLabel("All")}
+          >
+            All
+          </button>
+
+          {labels.map((label) => (
+            <button
+              key={label}
+              className={selectedLabel === label ? "tab active-tab" : "tab"}
+              onClick={() => setSelectedLabel(label)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {filteredNotes.length === 0 ? (
+          <div className="empty-dashboard">
+            <h2>No notes yet</h2>
+            <p>Click “Add new note” to create your first note.</p>
+          </div>
+        ) : (
+          <section className="notes-grid">
+            {filteredNotes.map((note) => (
+              <div className="note-card" key={note.id}>
+                <p className="date">{note.date}</p>
+
+                <div className="note-label">
+                  <span className={`dot ${note.label.toLowerCase()}`}></span>
+                  {note.label}
+                </div>
+
+                <h3>{note.title}</h3>
+                <p className="note-preview">
+                  {note.content || "No content yet..."}
+                </p>
+
+                <div className="card-actions">
+                  <button onClick={() => setEditingNote(note)}>Edit</button>
+                  <button onClick={() => deleteNote(note.id)}>Delete</button>
+                </div>
+              </div>
+            ))}
+          </section>
         )}
       </main>
+
+      {editingNote && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h2>Edit Note</h2>
+
+            <input
+              className="modal-input"
+              value={editingNote.title}
+              onChange={(e) =>
+                setEditingNote({
+                  ...editingNote,
+                  title: e.target.value,
+                })
+              }
+              placeholder="Note title"
+            />
+
+            <select
+              className="modal-input"
+              value={editingNote.label}
+              onChange={(e) =>
+                setEditingNote({
+                  ...editingNote,
+                  label: e.target.value,
+                })
+              }
+            >
+              {labels.map((label) => (
+                <option key={label} value={label}>
+                  {label}
+                </option>
+              ))}
+            </select>
+
+            <textarea
+              className="modal-textarea"
+              value={editingNote.content}
+              onChange={(e) =>
+                setEditingNote({
+                  ...editingNote,
+                  content: e.target.value,
+                })
+              }
+              placeholder="Write your note here..."
+            />
+
+            <div className="modal-actions">
+              <button className="cancel-btn" onClick={() => setEditingNote(null)}>
+                Cancel
+              </button>
+              <button className="save-btn" onClick={saveNote}>
+                Save Note
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
